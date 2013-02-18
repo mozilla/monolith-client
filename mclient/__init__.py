@@ -30,7 +30,7 @@ class Client(object):
         self.es = self.server + info['es_endpoint']
         self.fields = info['fields']
 
-    def __call__(self, field, start, end, interval=DAY):
+    def __call__(self, field, start, end, interval=DAY, query=None):
         if isinstance(start, str):
             start = datetime.datetime.strptime(start, '%Y-%m-%d')
             end = datetime.datetime.strptime(end, '%Y-%m-%d')
@@ -42,6 +42,11 @@ class Client(object):
 
         if isinstance(interval, int):
             interval = _interval2str[interval]
+
+        # XXX we'll see later if we want to provide a
+        # nicer query interface
+        if query is None
+            query = {"match_all": {}}
 
         if interval == 'day':
             # simple day query
@@ -91,4 +96,3 @@ if __name__ == '__main__':
 
     for hit in c('downloads_count', '2012-01-01', '2012-01-31', interval='week'):
         print hit
-

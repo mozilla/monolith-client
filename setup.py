@@ -41,6 +41,6 @@ setup(name='monolith-client',
     zip_safe=False,
     install_requires=requires,
     tests_require=test_requires,
-    test_suite="monolith",
+    test_suite="mclient",
     extras_require={'test': test_requires},
 )

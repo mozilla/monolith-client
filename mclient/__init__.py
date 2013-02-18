@@ -81,25 +81,9 @@ class Client(object):
             yield {'count': entry['total'], 'date': date_}
 
 
+def main():
+    raise NotImplementedError("add a CLI here")
+
 
 if __name__ == '__main__':
-    c = Client('http://0.0.0.0:6543')
-
-    start, end = '2012-01-01', '2012-01-31'
-
-    # daily count
-    hits = list(c('downloads_count', start, end))
-    assert len(hits) == 30, len(hits)
-
-    # weekly
-    hits = list(c('downloads_count', start, end, interval='week'))
-    assert len(hits) == 6, len(hits)
-
-    # monthly for app_id == 1
-    hits = list(c('downloads_count', start, '2012-05-01', interval='month',
-                   add_on='1'))
-    assert len(hits) == 4, len(hits)
-
-    hits2 = list(c('downloads_count', start, '2012-05-01', interval='month',
-                    add_on='2'))
-    assert hits != hits2
+    main()

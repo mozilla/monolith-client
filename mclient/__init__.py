@@ -30,7 +30,7 @@ class Client(object):
         self.es = self.server + info['es_endpoint']
         self.fields = info['fields']
 
-    def __call__(self, field, start, end, interval=DAY, query=None):
+    def __call__(self, field, start, end, interval=DAY, **terms):
         if isinstance(start, str):
             start = datetime.datetime.strptime(start, '%Y-%m-%d')
             end = datetime.datetime.strptime(end, '%Y-%m-%d')
@@ -45,54 +45,61 @@ class Client(object):
 
         # XXX we'll see later if we want to provide a
         # nicer query interface
-        if query is None
-            query = {"match_all": {}}
 
-        if interval == 'day':
-            # simple day query
-            query = {
-                 "query": {"match_all": {}},
-                 "filter": {"range": {"date":
-                            {"gte": start_date_str, "lt": end_date_str}}},
-                 "sort": [{"date": {"order" : "asc"}}],
-                 "size": delta }
-
-            res = self.session.post(self.es, data=json.dumps(query)).json()
-
-            for hit in res['hits']['hits']:
-                data = hit['_source']
-                yield {'count': data[field], 'date': _iso2date(data['date'])}
-        else:
-            # we need a facet query
-            query = {
-                 "query": {"match_all": {}},
-                 "filter": {"range": {"date":
-                            {"gte": start_date_str, "lt": end_date_str}}},
-                 "sort": [{"date": {"order" : "asc"}}],
-                 "size": delta ,
-                 "facets": {"histo1": {
-                                "date_histogram": {
-                                           "value_field" : field,
-                                           "interval": interval,
-                                           "key_field": "date"}
-                                }
+        # we need a facet query
+        query = {
+                "query": {"match_all": {}},
+                "facets": {"histo1": {
+                            "date_histogram": {
+                                        "value_field" : field,
+                                        "interval": interval,
+                                        "key_field": "date"},
+                "facet_filter": {
+                    "range": {"date":
+                        {"gte": start_date_str, "lt": end_date_str}}
                     }
-                 }
 
-            res = self.session.post(self.es, data=json.dumps(query)).json()
+                            }
+                }
+                }
 
-            for entry in res['facets']['histo1']['entries']:
+        if len(terms) > 0:
+            term = {}
 
-                date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)
-                yield {'count': entry['total'], 'date': date_}
+            for key, value in terms.items():
+                term[key] = value
+
+            range = query['facets']['histo1']['facet_filter']['range']
+            filter = {'and': [{'term': term},
+                              {'range': range}]}
+            query['facets']['histo1']['facet_filter'] = filter
+
+        res = self.session.post(self.es, data=json.dumps(query)).json()
+
+        for entry in res['facets']['histo1']['entries']:
+            date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)
+            yield {'count': entry['total'], 'date': date_}
 
 
 
 if __name__ == '__main__':
     c = Client('http://0.0.0.0:6543')
 
-    for hit in c('downloads_count', '2012-01-01', '2012-01-31'):
-        print hit
+    start, end = '2012-01-01', '2012-01-31'
 
-    for hit in c('downloads_count', '2012-01-01', '2012-01-31', interval='week'):
-        print hit
+    # daily count
+    hits = list(c('downloads_count', start, end))
+    assert len(hits) == 30, len(hits)
+
+    # weekly
+    hits = list(c('downloads_count', start, end, interval='week'))
+    assert len(hits) == 6, len(hits)
+
+    # monthly for app_id == 1
+    hits = list(c('downloads_count', start, '2012-05-01', interval='month',
+                   add_on='1'))
+    assert len(hits) == 4, len(hits)
+
+    hits2 = list(c('downloads_count', start, '2012-05-01', interval='month',
+                    add_on='2'))
+    assert hits != hits2

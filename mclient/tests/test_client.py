@@ -8,7 +8,7 @@ start, end = '2012-01-01', '2012-01-31'
 class TestClient(unittest.TestCase):
 
     def setUp(self):
-        # XXX will use an ES instance ran by the test fixture
+        # XXX will use a monolith instance ran by the test fixture
         self.client = Client('http://0.0.0.0:6543')
 
     def test_global_daily(self):

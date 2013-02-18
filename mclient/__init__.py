@@ -26,7 +26,10 @@ class Client(object):
         self.server = server.rstrip('/')
         self.session = requests.session()
         # getting monolith info
-        info = self.session.get(server).json()
+        info = self.session.get(server).json
+        if callable(info):
+            info = info()
+
         self.es = self.server + info['es_endpoint']
         self.fields = info['fields']
 
@@ -74,7 +77,9 @@ class Client(object):
                               {'range': range}]}
             query['facets']['histo1']['facet_filter'] = filter
 
-        res = self.session.post(self.es, data=json.dumps(query)).json()
+        res = self.session.post(self.es, data=json.dumps(query)).json
+        if callable(res):
+            res = res()
 
         for entry in res['facets']['histo1']['entries']:
             date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)

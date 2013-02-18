@@ -1,12 +1,23 @@
 import requests
 import datetime
 import json
+from time import strptime
 
 
 DAY = 1
 WEEK = 2
 MONTH = 3
 YEAR = 4
+
+_interval2str = {DAY: 'day',
+                 WEEK: 'week',
+                 MONTH: 'month',
+                 YEAR: 'year'}
+
+def _iso2date(data):
+    data = data.split('T')[0]
+    data = strptime(data, "%Y-%m-%d")
+    return datetime.date(data.tm_year, data.tm_mon, data.tm_mday)
 
 
 class Client(object):
@@ -19,7 +30,7 @@ class Client(object):
         self.es = self.server + info['es_endpoint']
         self.fields = info['fields']
 
-    def __call__(self, field, start, end, aggregate=DAY):
+    def __call__(self, field, start, end, interval=DAY):
         if isinstance(start, str):
             start = datetime.datetime.strptime(start, '%Y-%m-%d')
             end = datetime.datetime.strptime(end, '%Y-%m-%d')
@@ -29,8 +40,10 @@ class Client(object):
         start_date_str = start.strftime('%Y-%m-%d')
         end_date_str = end.strftime('%Y-%m-%d')
 
+        if isinstance(interval, int):
+            interval = _interval2str[interval]
 
-        if aggregate == DAY:
+        if interval == 'day':
             # simple day query
             query = {
                  "query": {"match_all": {}},
@@ -39,17 +52,43 @@ class Client(object):
                  "sort": [{"date": {"order" : "asc"}}],
                  "size": delta }
 
-        elif aggregate:
-            # we need a facet query
-            raise NotImplementedError()
+            res = self.session.post(self.es, data=json.dumps(query)).json()
 
-        res = self.session.post(self.es, data=json.dumps(query)).json()
-        for hit in res['hits']['hits']:
-            yield hit['_source']
+            for hit in res['hits']['hits']:
+                data = hit['_source']
+                yield {'count': data[field], 'date': _iso2date(data['date'])}
+        else:
+            # we need a facet query
+            query = {
+                 "query": {"match_all": {}},
+                 "filter": {"range": {"date":
+                            {"gte": start_date_str, "lt": end_date_str}}},
+                 "sort": [{"date": {"order" : "asc"}}],
+                 "size": delta ,
+                 "facets": {"histo1": {
+                                "date_histogram": {
+                                           "value_field" : field,
+                                           "interval": interval,
+                                           "key_field": "date"}
+                                }
+                    }
+                 }
+
+            res = self.session.post(self.es, data=json.dumps(query)).json()
+
+            for entry in res['facets']['histo1']['entries']:
+
+                date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)
+                yield {'count': entry['total'], 'date': date_}
 
 
 
 if __name__ == '__main__':
     c = Client('http://0.0.0.0:6543')
+
     for hit in c('downloads_count', '2012-01-01', '2012-01-31'):
         print hit
+
+    for hit in c('downloads_count', '2012-01-01', '2012-01-31', interval='week'):
+        print hit
+

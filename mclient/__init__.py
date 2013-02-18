@@ -32,13 +32,14 @@ class Client(object):
 
         if aggregate == DAY:
             # simple day query
-            query = {"query": {"match_all": {}},
-                "filter": {"range": {"date":
+            query = {
+                 "query": {"match_all": {}},
+                 "filter": {"range": {"date":
                             {"gte": start_date_str, "lt": end_date_str}}},
-                "sort": [{"date": {"order" : "asc"}}],
-                "size": delta }
+                 "sort": [{"date": {"order" : "asc"}}],
+                 "size": delta }
 
-        else:
+        elif aggregate:
             # we need a facet query
             raise NotImplementedError()
 

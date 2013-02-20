@@ -40,7 +40,6 @@ class Client(object):
             end = datetime.datetime.strptime(end, '%Y-%m-%d')
 
         # building the query
-        delta = (end - start).days
         start_date_str = start.strftime('%Y-%m-%d')
         end_date_str = end.strftime('%Y-%m-%d')
 

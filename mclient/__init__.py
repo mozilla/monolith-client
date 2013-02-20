@@ -54,6 +54,7 @@ class Client(object):
             "query": {
                 "match_all": {},
             },
+            "size": 0,
             "facets": {
                 "histo1": {
                     "date_histogram": {

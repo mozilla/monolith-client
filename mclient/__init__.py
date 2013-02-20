@@ -14,6 +14,7 @@ _interval2str = {DAY: 'day',
                  MONTH: 'month',
                  YEAR: 'year'}
 
+
 def _iso2date(data):
     data = data.split('T')[0]
     data = strptime(data, "%Y-%m-%d")
@@ -80,6 +81,9 @@ class Client(object):
         res = self.session.post(self.es, data=json.dumps(query)).json
         if callable(res):
             res = res()
+
+        if not isinstance(res, dict):
+            raise ValueError(res)
 
         for entry in res['facets']['histo1']['entries']:
             date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)

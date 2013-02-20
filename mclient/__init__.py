@@ -60,7 +60,7 @@ class Client(object):
                                         "key_field": "date"},
                 "facet_filter": {
                     "range": {"date":
-                        {"gte": start_date_str, "lt": end_date_str}}
+                        {"gte": start_date_str, "lte": end_date_str}}
                     }
 
                             }

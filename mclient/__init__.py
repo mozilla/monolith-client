@@ -51,20 +51,27 @@ class Client(object):
 
         # we need a facet query
         query = {
-                "query": {"match_all": {}},
-                "facets": {"histo1": {
-                            "date_histogram": {
-                                        "value_field" : field,
-                                        "interval": interval,
-                                        "key_field": "date"},
-                "facet_filter": {
-                    "range": {"date":
-                        {"gte": start_date_str, "lte": end_date_str}}
-                    }
-
+            "query": {
+                "match_all": {},
+            },
+            "facets": {
+                "histo1": {
+                    "date_histogram": {
+                        "value_field": field,
+                        "interval": interval,
+                        "key_field": "date",
+                    },
+                    "facet_filter": {
+                        "range": {
+                            "date": {
+                                "gte": start_date_str,
+                                "lte": end_date_str,
                             }
+                        }
+                    }
                 }
-                }
+            }
+        }
 
         if len(terms) > 0:
             term = {}

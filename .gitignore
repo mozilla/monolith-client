@@ -1,0 +1,11 @@
+*.py[co]
+.coverage
+bin
+build
+elasticsearch
+include
+lib
+man
+pyramid.log
+.noseids
+*~

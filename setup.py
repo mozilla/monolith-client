@@ -19,18 +19,22 @@ test_requires = requires + [
 
 with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
+with open(os.path.join(here, 'CHANGES.rst')) as f:
+    CHANGES = f.read()
 
 
 setup(name='monolith.client',
     version=__version__,
-    description='Monolith client',
-    long_description=README,
+    description='Mozilla Monolith Client',
+    long_description=README + '\n\n' + CHANGES,
     classifiers=[
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
-        "Framework :: Pylons",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Framework :: Pyramid",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application"
     ],
@@ -38,6 +42,7 @@ setup(name='monolith.client',
     author='Mozilla Services',
     author_email='services-dev@mozilla.org',
     url='https://github.com/mozilla/monolith-client',
+    license="Apache 2.0",
     packages=find_packages(),
     namespace_packages=['monolith'],
     include_package_data=True,

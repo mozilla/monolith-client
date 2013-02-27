@@ -12,7 +12,7 @@ class TestClient(unittest.TestCase):
 
     def setUp(self):
         # XXX will use a monolith instance ran by the test fixture
-        self.es_client = ElasticSearch('http://127.0.0.1:9200')
+        self.es_client = ElasticSearch('http://127.0.0.1:9213')
         self.client = Client('http://0.0.0.0:6543')
         self.es_client.create_index('time_2012-01')
         for i in range(1, 32):

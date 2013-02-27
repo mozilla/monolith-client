@@ -10,7 +10,7 @@ make build
 
 echo "Starting tests..."
 
-bin/nosetests -s -d -v --with-xunit --with-coverage --cover-package mclient mlient
-bin/coverage xml $(find mclient -name '*.py')
+bin/nosetests -s -d -v --with-xunit --with-coverage --cover-package monolith monolith
+bin/coverage xml $(find monolith/client -name '*.py')
 
 echo "FIN"

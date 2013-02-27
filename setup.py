@@ -1,5 +1,3 @@
-""" Setup file.
-"""
 import os
 from setuptools import setup, find_packages
 
@@ -23,7 +21,7 @@ with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
 
 
-setup(name='monolith-client',
+setup(name='monolith.client',
     version=__version__,
     description='Monolith client',
     long_description=README,
@@ -41,10 +39,11 @@ setup(name='monolith-client',
     author_email='services-dev@mozilla.org',
     url='https://github.com/mozilla/monolith-client',
     packages=find_packages(),
+    namespace_packages=['monolith'],
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
     tests_require=test_requires,
-    test_suite="mclient",
+    test_suite="monolith.client",
     extras_require={'test': test_requires},
 )

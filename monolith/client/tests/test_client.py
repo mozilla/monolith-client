@@ -2,7 +2,7 @@ import unittest
 
 from pyelasticsearch import ElasticSearch
 
-from mclient import Client
+from monolith.client import Client
 
 
 start, end = '2012-01-01', '2012-01-31'

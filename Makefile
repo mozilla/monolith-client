@@ -19,7 +19,7 @@ $(PYTHON):
 build: $(PYTHON) elasticsearch
 	$(INSTALL) -f https://github.com/SiteSupport/gevent/downloads gevent==$(GEVENT_VERSION)
 	$(PYTHON) setup.py develop
-	$(INSTALL) monolith-client[test]
+	$(INSTALL) monolith.client[test]
 
 clean:
 	rm -rf $(BUILD_DIRS)
@@ -29,7 +29,7 @@ test: build
 	elasticsearch/bin/elasticsearch -p es.pid
 	bin/pserve --pid-file monolith.pid --daemon monolith.ini
 	sleep 5
-	$(BIN)/nosetests -s -d -v --with-coverage --cover-package mclient mclient
+	$(BIN)/nosetests -s -d -v --with-coverage --cover-package monolith monolith
 	kill `cat es.pid`
 	kill `cat monolith.pid`
 	rm -f es.pid

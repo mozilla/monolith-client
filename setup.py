@@ -3,14 +3,18 @@
 import os
 from setuptools import setup, find_packages
 
+__version__ = '0.1'
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 requires = [
     'requests',
+    'pyelasticsearch',
 ]
 
 test_requires = requires + [
     'coverage',
+    'monolith.web',
     'nose',
     'unittest2',
 ]
@@ -20,7 +24,7 @@ with open(os.path.join(here, 'README.rst')) as f:
 
 
 setup(name='monolith-client',
-    version='0.1',
+    version=__version__,
     description='Monolith client',
     long_description=README,
     classifiers=[

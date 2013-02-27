@@ -27,13 +27,13 @@ clean:
 test: build
 	rm -rf elasticsearch/data/monotest/
 	elasticsearch/bin/elasticsearch -p es.pid
-	# bin/pserve --pid-file monolith.pid --daemon monolith/tests/monolith.ini
+	bin/pserve --pid-file monolith.pid --daemon monolith.ini
 	sleep 5
 	$(BIN)/nosetests -s -d -v --with-coverage --cover-package mclient mclient
 	kill `cat es.pid`
-	# kill `cat monolith.pid`
+	kill `cat monolith.pid`
 	rm -f es.pid
-	# rm -f monolith.pid
+	rm -f monolith.pid
 
 elasticsearch:
 	curl -C - --progress-bar http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$(ES_VERSION).tar.gz | tar -zx

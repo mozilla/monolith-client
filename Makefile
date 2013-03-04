@@ -25,15 +25,7 @@ clean:
 	rm -rf $(BUILD_DIRS)
 
 test: build
-	rm -rf elasticsearch/data/monotest/
-	elasticsearch/bin/elasticsearch -p es.pid
-	bin/pserve --pid-file monolith.pid --daemon monolith.ini
-	sleep 5
-	$(BIN)/nosetests -s -d -v --with-coverage --cover-package monolith monolith
-	kill `cat es.pid`
-	kill `cat monolith.pid`
-	rm -f es.pid
-	rm -f monolith.pid
+	$(PYTHON) runtests.py
 
 elasticsearch:
 	curl -C - --progress-bar http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$(ES_VERSION).tar.gz | tar -zx

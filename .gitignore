@@ -6,6 +6,7 @@ elasticsearch
 include
 lib
 man
+nosetests.xml
 pyramid.log
 .noseids
 *~

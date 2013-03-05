@@ -39,6 +39,8 @@ class Client(object):
             start = datetime.datetime.strptime(start, '%Y-%m-%d')
             end = datetime.datetime.strptime(end, '%Y-%m-%d')
 
+        delta = (end - start).days
+
         # building the query
         start_date_str = start.strftime('%Y-%m-%d')
         end_date_str = end.strftime('%Y-%m-%d')
@@ -54,7 +56,7 @@ class Client(object):
             "query": {
                 "match_all": {},
             },
-            "size": 0,
+            "size": delta,
             "facets": {
                 "histo1": {
                     "date_histogram": {
@@ -86,6 +88,7 @@ class Client(object):
             query['facets']['histo1']['facet_filter'] = filter
 
         res = self.session.post(self.es, data=json.dumps(query)).json
+
         if callable(res):
             res = res()
 
@@ -94,7 +97,12 @@ class Client(object):
 
         for entry in res['facets']['histo1']['entries']:
             date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)
-            yield {'count': entry['total'], 'date': date_}
+            if 'total' in entry:
+                count = entry['total']
+            else:
+                count = entry['count']
+
+            yield {'count': count, 'date': date_}
 
 
 def main():

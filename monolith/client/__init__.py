@@ -95,6 +95,9 @@ class Client(object):
         if not isinstance(res, dict):
             raise ValueError(res)
 
+        if 'errors' in res:
+            raise ValueError(res['errors'][0]['description'])
+
         for entry in res['facets']['histo1']['entries']:
             date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)
             if 'total' in entry:

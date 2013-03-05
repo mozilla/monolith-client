@@ -39,7 +39,14 @@ class Client(object):
             start = datetime.datetime.strptime(start, '%Y-%m-%d')
             end = datetime.datetime.strptime(end, '%Y-%m-%d')
 
-        delta = (end - start).days
+        if interval == _DAY:
+            delta = (end - start).days
+        elif interval == _WEEK:
+            delta = (end - start).weeks
+        elif interval == _MONTH:
+            delta = (end.year - start.year) * 12 + end.month - start.month
+        else:
+            delta = end.year - start.year
 
         # building the query
         start_date_str = start.strftime('%Y-%m-%d')

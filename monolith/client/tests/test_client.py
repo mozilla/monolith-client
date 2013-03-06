@@ -42,6 +42,8 @@ class TestClient(unittest.TestCase):
     def test_global_weekly(self):
         hits = list(self.client('downloads_count', start, end,
                                 interval='week'))
+
+        # between 2012-01-01 and 2012-01-31, we have 4 weeks
         self.assertEqual(len(hits), 6)
 
     def test_monthly(self):
@@ -49,7 +51,11 @@ class TestClient(unittest.TestCase):
         hits = list(self.client('downloads_count', start,
                                 '2012-05-01', interval='month',
                                 add_on='1'))
-        self.assertEqual(len(hits), 3)
+
+        # we should have the 5 first months of 2012
+        res = [hit['date'].month for hit in hits]
+        res.sort()
+        self.assertEqual(res, [1, 2, 3, 4, 5])
 
         hits2 = list(self.client('downloads_count', start, '2012-05-01',
                                  interval='month', add_on='2'))

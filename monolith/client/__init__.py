@@ -3,6 +3,8 @@ import datetime
 import json
 from time import strptime
 
+from monolith.client import util
+
 
 DAY = 1
 WEEK = 2
@@ -13,6 +15,11 @@ _interval2str = {DAY: 'day',
                  WEEK: 'week',
                  MONTH: 'month',
                  YEAR: 'year'}
+
+_str2interval = {'day': DAY,
+                 'week': WEEK,
+                 'month': MONTH,
+                 'year': YEAR}
 
 
 def _iso2date(data):
@@ -35,18 +42,27 @@ class Client(object):
         self.fields = info['fields']
 
     def __call__(self, field, start, end, interval=DAY, **terms):
+        if isinstance(interval, str):
+            interval = _str2interval[interval]
+
         if isinstance(start, str):
-            start = datetime.datetime.strptime(start, '%Y-%m-%d')
-            end = datetime.datetime.strptime(end, '%Y-%m-%d')
+            start = datetime.datetime.strptime(start, '%Y-%m-%d').toordinal()
+            start = datetime.date.fromordinal(start)
+            end = datetime.datetime.strptime(end, '%Y-%m-%d').toordinal()
+            end = datetime.date.fromordinal(end)
 
         if interval == DAY:
             delta = (end - start).days
+            drange = util.iterdays(start, end)
         elif interval == WEEK:
-            delta = (end - start).weeks
+            delta = util.numweeks(start, end)
+            drange = util.iterweeks(start, end)
         elif interval == MONTH:
-            delta = (end.year - start.year) * 12 + end.month - start.month
+            delta = util.nummonths(start, end)
+            drange = util.itermonths(start, end)
         else:
             delta = end.year - start.year
+            drange = util.iteryears(start, end)
 
         # building the query
         start_date_str = start.strftime('%Y-%m-%d')
@@ -89,10 +105,10 @@ class Client(object):
             for key, value in terms.items():
                 term[key] = value
 
-            range = query['facets']['histo1']['facet_filter']['range']
-            filter = {'and': [{'term': term},
-                              {'range': range}]}
-            query['facets']['histo1']['facet_filter'] = filter
+            range_ = query['facets']['histo1']['facet_filter']['range']
+            filter_ = {'and': [{'term': term},
+                               {'range': range_}]}
+            query['facets']['histo1']['facet_filter'] = filter_
 
         res = self.session.post(self.es, data=json.dumps(query)).json
 
@@ -105,14 +121,24 @@ class Client(object):
         if 'errors' in res:
             raise ValueError(res['errors'][0]['description'])
 
+        dates = set()
+
         for entry in res['facets']['histo1']['entries']:
-            date_ = datetime.datetime.fromtimestamp(entry['time'] / 1000.)
+            date_ = datetime.date.fromtimestamp(entry['time'] / 1000.)
             if 'total' in entry:
                 count = entry['total']
             else:
                 count = entry['count']
 
+            if date_ not in dates:
+                dates.add(date_)
+
             yield {'count': count, 'date': date_}
+
+        # yielding zeros
+        for date_ in drange:
+            if date_ not in dates:
+                yield {'count': 0, 'date': date_}
 
 
 def main():

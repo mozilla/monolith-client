@@ -39,6 +39,16 @@ class TestClient(unittest.TestCase):
         hits = list(self.client('downloads_count', start, end))
         self.assertEqual(len(hits), 31)
 
+    def test_no_fill(self):
+        client = Client('http://0.0.0.0:6543', zero_fill=False)
+        hits = list(client('downloads_count', '2010-01-01', '2010-01-31'))
+        self.assertEqual(len(hits), 0)
+
+        # zero fill by default
+        client = Client('http://0.0.0.0:6543')
+        hits = list(client('downloads_count', '2010-01-01', '2010-01-31'))
+        self.assertEqual(len(hits), 31)
+
     def test_global_weekly(self):
         hits = list(self.client('downloads_count', start, end,
                                 interval='week'))

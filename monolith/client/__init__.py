@@ -30,7 +30,7 @@ def _iso2date(data):
 
 class Client(object):
 
-    def __init__(self, server):
+    def __init__(self, server, zero_fill=True):
         self.server = server.rstrip('/')
         self.session = requests.session()
         # getting monolith info
@@ -40,6 +40,7 @@ class Client(object):
 
         self.es = self.server + info['es_endpoint']
         self.fields = info['fields']
+        self.zero_fill = zero_fill
 
     def __call__(self, field, start, end, interval=DAY, **terms):
         if isinstance(interval, str):
@@ -135,10 +136,11 @@ class Client(object):
 
             yield {'count': count, 'date': date_}
 
-        # yielding zeros
-        for date_ in drange:
-            if date_ not in dates:
-                yield {'count': 0, 'date': date_}
+        if self.zero_fill:
+            # yielding zeros
+            for date_ in drange:
+                if date_ not in dates:
+                    yield {'count': 0, 'date': date_}
 
 
 def main():

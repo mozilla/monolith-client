@@ -11,9 +11,9 @@ class TestIterators(unittest.TestCase):
         self.end = datetime.date(2012, 05, 01)
 
     def test_iterdays(self):
-        # 486 days : 365 in 2011 + 4 months in 2012
+        # 487 days : 365 in 2011 + 4 months in 2012
         res = list(iterdays(self.start, self.end))
-        self.assertEquals(len(res), 486)
+        self.assertEquals(len(res), 487)
 
     def test_iteryears(self):
         # 2 years

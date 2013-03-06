@@ -2,7 +2,7 @@ import datetime
 
 
 def iterdays(start, end):
-    delta = (end - start).days
+    delta = (end - start).days + 1
     return (start + datetime.timedelta(n) for n in range(delta))
 
 

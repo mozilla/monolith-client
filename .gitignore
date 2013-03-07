@@ -2,6 +2,7 @@
 .coverage
 bin
 build
+coverage.xml
 elasticsearch
 include
 lib

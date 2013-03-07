@@ -1,19 +1,20 @@
-import unittest
-
-from pyelasticsearch import ElasticSearch
+from monolith.web import main
+from pyelastictest import IsolatedTestCase
+from webtest.http import StopableWSGIServer
 
 from monolith.client import Client
 
+start = '2012-01-01'
+end = '2012-01-31'
 
-start, end = '2012-01-01', '2012-01-31'
 
-
-class TestClient(unittest.TestCase):
+class TestClient(IsolatedTestCase):
 
     def setUp(self):
-        # XXX will use a monolith instance ran by the test fixture
-        self.es_client = ElasticSearch('http://127.0.0.1:9213')
-        self.client = Client('http://0.0.0.0:6543')
+        super(TestClient, self).setUp()
+        settings = {'elasticsearch.host': self.es_cluster[0].address}
+        app = main({}, **settings)
+        self.server = StopableWSGIServer.create(app)
         self.es_client.create_index('time_2012-01')
         for i in range(1, 32):
             self.es_client.index('time_2012-01', 'downloads', {
@@ -28,45 +29,48 @@ class TestClient(unittest.TestCase):
                 'add_on': str(j % 2),
             })
         self.es_client.refresh()
+        self.server.wait()
 
     def tearDown(self):
-        try:
-            self.es_client.delete_index('time_*')
-        except Exception:
-            pass
+        self.server.shutdown()
+        super(TestClient, self).tearDown()
+
+    def _make_one(self, **kw):
+        return Client(self.server.application_url, **kw)
 
     def test_global_daily(self):
-        hits = list(self.client('downloads_count', start, end))
+        client = self._make_one()
+        hits = list(client('downloads_count', start, end))
         self.assertEqual(len(hits), 31)
 
     def test_no_fill(self):
-        client = Client('http://0.0.0.0:6543', zero_fill=False)
+        client = self._make_one(zero_fill=False)
         hits = list(client('downloads_count', '2010-01-01', '2010-01-31'))
         self.assertEqual(len(hits), 0)
 
         # zero fill by default
-        client = Client('http://0.0.0.0:6543')
+        client = self._make_one()
         hits = list(client('downloads_count', '2010-01-01', '2010-01-31'))
         self.assertEqual(len(hits), 31)
 
     def test_global_weekly(self):
-        hits = list(self.client('downloads_count', start, end,
-                                interval='week'))
+        client = self._make_one()
+        hits = list(client('downloads_count', start, end, interval='week'))
 
         # between 2012-01-01 and 2012-01-31, we have 4 weeks
         self.assertEqual(len(hits), 6)
 
     def test_monthly(self):
+        client = self._make_one()
         # monthly for app_id == 1
-        hits = list(self.client('downloads_count', start,
-                                '2012-05-01', interval='month',
-                                add_on='1'))
+        hits = list(client('downloads_count', start, '2012-05-01',
+                           interval='month', add_on='1'))
 
         # we should have the 5 first months of 2012
         res = [hit['date'].month for hit in hits]
         res.sort()
         self.assertEqual(res, [1, 2, 3, 4, 5])
 
-        hits2 = list(self.client('downloads_count', start, '2012-05-01',
-                                 interval='month', add_on='2'))
+        hits2 = list(client('downloads_count', start, '2012-05-01',
+                            interval='month', add_on='2'))
         self.assertNotEqual(hits, hits2)

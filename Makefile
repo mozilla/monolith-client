@@ -25,10 +25,11 @@ clean:
 	rm -rf $(BUILD_DIRS)
 
 test: build
-	$(PYTHON) runtests.py
+	ES_PATH=$(HERE)/elasticsearch \
+	$(BIN)/nosetests -s -d -v --with-xunit --with-coverage --cover-package monolith monolith
 
 elasticsearch:
-	curl -C - --progress-bar http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$(ES_VERSION).tar.gz | tar -zx
+	curl -C - http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$(ES_VERSION).tar.gz | tar -zx
 	mv elasticsearch-$(ES_VERSION) elasticsearch
 	chmod a+x elasticsearch/bin/elasticsearch
 	mv elasticsearch/config/elasticsearch.yml elasticsearch/config/elasticsearch.in.yml

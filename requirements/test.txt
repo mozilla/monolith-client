@@ -10,6 +10,7 @@ cornice==0.13
 coverage==3.6
 monolith.web==0.2
 nose==1.2.1
+ordereddict==1.1
 pyelastictest==0.1
 pyramid==1.4
 repoze.lru==0.6

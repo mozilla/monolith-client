@@ -15,7 +15,6 @@ test_requires = requires + [
     'monolith.web',
     'nose',
     'pyelastictest',
-    'unittest2',
     'WebTest',
 ]
 

@@ -12,7 +12,7 @@ class TestClient(IsolatedTestCase):
 
     def setUp(self):
         super(TestClient, self).setUp()
-        settings = {'elasticsearch.host': self.es_cluster[0].address}
+        settings = {'elasticsearch.host': self.es_cluster.urls}
         app = main({}, **settings)
         self.server = StopableWSGIServer.create(app)
         self.es_client.create_index('time_2012-01')

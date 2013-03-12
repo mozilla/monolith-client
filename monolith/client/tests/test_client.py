@@ -15,13 +15,14 @@ class TestClient(IsolatedTestCase):
         settings = {'elasticsearch.host': self.es_cluster.urls}
         app = main({}, **settings)
         self.server = StopableWSGIServer.create(app)
-        self.es_client.create_index('time_2012-01')
+        docs = []
         for i in range(1, 32):
-            self.es_client.index('time_2012-01', 'downloads', {
+            docs.append({
                 'date': '2012-01-%.2d' % i,
                 'downloads_count': i,
                 'add_on': str(i % 2 + 1),
             })
+        self.es_client.bulk_index('time_2012-01', 'downloads', docs)
         for j in range(2, 6):
             self.es_client.index('time_2012-%.2d' % j, 'downloads', {
                 'date': '2012-%.2d-01' % j,

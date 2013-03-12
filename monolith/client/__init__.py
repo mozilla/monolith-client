@@ -53,16 +53,12 @@ class Client(object):
             end = datetime.date.fromordinal(end)
 
         if interval == DAY:
-            delta = (end - start).days
             drange = util.iterdays(start, end)
         elif interval == WEEK:
-            delta = util.numweeks(start, end)
             drange = util.iterweeks(start, end)
         elif interval == MONTH:
-            delta = util.nummonths(start, end)
             drange = util.itermonths(start, end)
         else:
-            delta = end.year - start.year
             drange = util.iteryears(start, end)
 
         # building the query
@@ -80,7 +76,7 @@ class Client(object):
             "query": {
                 "match_all": {},
             },
-            "size": delta,
+            "size": 0,  # we aren't interested in the hits
             "facets": {
                 "histo1": {
                     "date_histogram": {

@@ -6,8 +6,8 @@ __version__ = '0.1'
 here = os.path.abspath(os.path.dirname(__file__))
 
 requires = [
-    'requests',
-    'pyelasticsearch',
+    'requests==1.1.0',
+    'pyelasticsearch==0.3',
 ]
 
 test_requires = requires + [

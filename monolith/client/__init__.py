@@ -121,7 +121,8 @@ class Client(object):
         dates = set()
 
         for entry in res['facets']['histo1']['entries']:
-            date_ = datetime.date.fromtimestamp(entry['time'] / 1000.)
+            time_ = entry['time'] / 1000.0
+            date_ = datetime.datetime.utcfromtimestamp(time_).date()
             if 'total' in entry:
                 count = entry['total']
             else:

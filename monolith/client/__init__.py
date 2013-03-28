@@ -3,6 +3,8 @@ import datetime
 import json
 from time import strptime
 
+from statsd import StatsdTimer, StatsdCounter, init_statsd
+
 from monolith.client import util
 
 
@@ -30,7 +32,7 @@ def _iso2date(data):
 
 class Client(object):
 
-    def __init__(self, server, zero_fill=True):
+    def __init__(self, server, zero_fill=True, **kw):
         self.server = server.rstrip('/')
         self.session = requests.session()
         # getting monolith info
@@ -41,6 +43,15 @@ class Client(object):
         self.es = self.server + info['es_endpoint']
         self.fields = info['fields']
         self.zero_fill = zero_fill
+
+        # statsd settings
+        statsd_settings = {'STATSD_HOST': kw.get('statsd.host', 'localhost'),
+                           'STATSD_PORT': int(kw.get('statsd.port', 8125)),
+                           'STATSD_SAMPLE_RATE': float(kw.get('statsd.sample',
+                                                              1.0)),
+                           'STATSD_BUCKET_PREFIX': kw.get('statsd.prefix',
+                                                          'monolith.client')}
+        init_statsd(statsd_settings)
 
     def __call__(self, field, start, end, interval=DAY, **terms):
         if isinstance(interval, str):
@@ -107,10 +118,15 @@ class Client(object):
                                {'range': range_}]}
             query['facets']['histo1']['facet_filter'] = filter_
 
-        res = self.session.post(self.es, data=json.dumps(query)).json
+        with StatsdTimer('query'):
+            res = self.session.post(self.es, data=json.dumps(query)).json
 
         if callable(res):
             res = res()
+
+        # statsd incr
+        counter = StatsdCounter('elasticsearch-call')
+        counter += 1
 
         if not isinstance(res, dict):
             raise ValueError(res)

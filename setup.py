@@ -8,6 +8,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 requires = [
     'requests',
     'pyelasticsearch',
+    'statsd-client'
 ]
 
 test_requires = requires + [

@@ -26,7 +26,7 @@ clean:
 
 test: build
 	ES_PATH=$(HERE)/elasticsearch \
-	$(BIN)/nosetests -s -d -v --with-xunit --with-coverage --cover-package monolith monolith
+	$(BIN)/nosetests -s -d -v --with-xunit --with-coverage --cover-package "monolith.client" monolith
 
 elasticsearch:
 	curl -C - http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-$(ES_VERSION).tar.gz | tar -zx

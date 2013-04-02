@@ -116,7 +116,7 @@ class Client(object):
                                {'range': range_}]}
             query['facets']['histo1']['facet_filter'] = filter_
 
-        with statsd.timer('elasticsearch-query'):
+        with self.statsd.timer('elasticsearch-query'):
             res = self.session.post(self.es, data=json.dumps(query)).json
 
             if callable(res):

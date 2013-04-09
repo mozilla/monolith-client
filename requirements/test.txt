@@ -11,6 +11,7 @@ coverage==3.6
 monolith.web==0.2
 nose==1.2.1
 ordereddict==1.1
+pyelasticsearch==0.4.1
 pyelastictest==0.3
 pyramid==1.4
 repoze.lru==0.6

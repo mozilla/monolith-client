@@ -7,7 +7,6 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 requires = [
     'requests',
-    'pyelasticsearch',
     'statsd'
 ]
 
@@ -15,6 +14,7 @@ test_requires = requires + [
     'coverage',
     'monolith.web',
     'nose',
+    'pyelasticsearch',
     'pyelastictest',
     'WebTest',
 ]

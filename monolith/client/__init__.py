@@ -51,7 +51,8 @@ class Client(object):
         self.statsd = StatsClient(host=statsd_host, port=statsd_port,
                                   prefix=statsd_prefix)
 
-    def __call__(self, field, start, end, interval=DAY, **terms):
+    def __call__(self, field, start, end, interval=DAY, strict_range=False,
+                 **terms):
         if isinstance(interval, str):
             interval = _str2interval[interval]
 
@@ -81,6 +82,13 @@ class Client(object):
         # nicer query interface
 
         # we need a facet query
+        if strict_range:
+            greater = "gt"
+            lower = "lt"
+        else:
+            greater = "gte"
+            lower = "lte"
+
         query = {
             "query": {
                 "match_all": {},
@@ -96,8 +104,8 @@ class Client(object):
                     "facet_filter": {
                         "range": {
                             "date": {
-                                "gte": start_date_str,
-                                "lte": end_date_str,
+                                greater: start_date_str,
+                                lower: end_date_str,
                             }
                         }
                     }
@@ -149,6 +157,8 @@ class Client(object):
         if self.zero_fill:
             # yielding zeros
             for date_ in drange:
+                if strict_range and date_ in (start, end):
+                    continue
                 if date_ not in dates:
                     yield {'count': 0, 'date': date_}
 

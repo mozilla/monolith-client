@@ -75,3 +75,43 @@ class TestClient(IsolatedTestCase):
         hits2 = list(client('downloads_count', start, '2012-05-01',
                             interval='month', add_on='2'))
         self.assertNotEqual(hits, hits2)
+
+    def test_global_daily_strict(self):
+        client = self._make_one()
+        hits = list(client('downloads_count', start, end, strict_range=True))
+        self.assertEqual(len(hits), 29)
+
+    def test_no_fill_strict(self):
+        client = self._make_one(zero_fill=False)
+        hits = list(client('downloads_count', '2010-01-01', '2010-01-31',
+                           strict_range=True))
+        self.assertEqual(len(hits), 0)
+
+        # zero fill by default
+        client = self._make_one()
+        hits = list(client('downloads_count', '2010-01-01', '2010-01-31',
+                           strict_range=True))
+        self.assertEqual(len(hits), 29)
+
+    def test_global_weekly_strict(self):
+        client = self._make_one()
+        hits = list(client('downloads_count', start, end, interval='week',
+                           strict_range=True))
+
+        # between 2012-01-01 and 2012-01-31, we have 4 weeks
+        self.assertEqual(len(hits), 6)
+
+    def test_monthly_strict(self):
+        client = self._make_one()
+        # monthly for app_id == 1
+        hits = list(client('downloads_count', start, '2012-05-01',
+                           interval='month', add_on='1', strict_range=True))
+
+        # we should have the 5 first months of 2012
+        res = [hit['date'].month for hit in hits]
+        res.sort()
+        self.assertEqual(res, [1, 2, 3, 4])
+
+        hits2 = list(client('downloads_count', start, '2012-05-01',
+                            interval='month', add_on='2', strict_range=True))
+        self.assertNotEqual(hits, hits2)

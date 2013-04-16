@@ -125,8 +125,12 @@ class Client(object):
             query['facets']['histo1']['facet_filter'] = filter_
 
         with self.statsd.timer('elasticsearch-query'):
-            res = self.session.post(self.es, data=json.dumps(query)).json
+            res = self.session.post(self.es, data=json.dumps(query))
+            if res.status_code != 200:
+                raise ValueError(res.content)
 
+            # getting the JSON content
+            res = res.json
             if callable(res):
                 res = res()
 

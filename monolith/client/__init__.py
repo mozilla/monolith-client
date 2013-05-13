@@ -53,6 +53,7 @@ class Client(object):
 
     def __call__(self, field, start, end, interval=DAY, strict_range=False,
                  **terms):
+
         if isinstance(interval, str):
             interval = _str2interval[interval]
 

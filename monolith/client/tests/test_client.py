@@ -115,3 +115,30 @@ class TestClient(IsolatedTestCase):
         hits2 = list(client('downloads_count', start, '2012-05-01',
                             interval='month', add_on='2', strict_range=True))
         self.assertNotEqual(hits, hits2)
+
+    def test_bug864975(self):
+        # see https://bugzilla.mozilla.org/show_bug.cgi?id=864975
+        # Tests that no extra date range is not filtered out.
+
+        # Populate ES with some data we want to query.
+        docs = []
+        for day in range(1, 5):
+            docs.append({
+                'date': '2013-04-%.2d' % day,
+                'visits': 100,
+            })
+        self.es_client.bulk_index('time_2013-04', 'visits', docs)
+
+        # ... And some we don't want to appear in the results.
+        for month in ('04', '01'):
+            self.es_client.index('time_2013-04', 'visits', {
+                'date': '2013-01-%s' % month,
+                'visits': 0,
+            })
+
+        self.es_client.refresh()
+        self.server.wait()
+
+        client = self._make_one()
+        hits = list(client('visits', '2013-04-01', '2013-04-05', 'day'))
+        self.assertEquals(len(hits), 5)

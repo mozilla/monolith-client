@@ -1,7 +1,34 @@
 Changelog
 =========
 
-0.1 (unreleased)
+0.6 - 2013-05-20
+----------------
+
+- Fixed an unicode-related issue which was making the client behaving in
+  unexpected ways. Bug 864975
+
+0.5 - 2013-04-16
+----------------
+
+- Return the original errors if we get some.
+
+0.4 - 2013-04-15
+----------------
+
+- Added the stric_range option.
+
+0.3 - 2013-04-09
+----------------
+
+- Removed unwanted dependencies
+- Fixed wrong variable references
+
+0.2 - 2013-03-28
+----------------
+
+- Moved to james socol statsd client
+
+0.1 - 2013-03-28 
 ----------------
 
 * Initial implementation

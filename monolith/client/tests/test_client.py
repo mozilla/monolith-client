@@ -142,3 +142,8 @@ class TestClient(IsolatedTestCase):
         client = self._make_one()
         hits = list(client('visits', '2013-04-01', '2013-04-05', 'day'))
         self.assertEquals(len(hits), 5)
+
+    def test_unicode_intervals(self):
+        client = self._make_one()
+        hits = list(client('downloads_count', start, end, interval=u'day'))
+        self.assertEqual(len(hits), 31)

@@ -54,13 +54,15 @@ class Client(object):
     def __call__(self, field, start, end, interval=DAY, strict_range=False,
                  **terms):
 
-        if isinstance(interval, str):
-            interval = _str2interval[interval]
+        if isinstance(interval, basestring):
+            interval = _str2interval[interval.encode()]
 
-        if isinstance(start, str):
-            start = datetime.datetime.strptime(start, '%Y-%m-%d').toordinal()
+        if isinstance(start, basestring):
+            start = datetime.datetime.strptime(start.encode(),
+                                               '%Y-%m-%d').toordinal()
             start = datetime.date.fromordinal(start)
-            end = datetime.datetime.strptime(end, '%Y-%m-%d').toordinal()
+            end = datetime.datetime.strptime(end.encode(),
+                                             '%Y-%m-%d').toordinal()
             end = datetime.date.fromordinal(end)
 
         if interval == DAY:

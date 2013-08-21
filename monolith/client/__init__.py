@@ -116,16 +116,13 @@ class Client(object):
             }
         }
 
-        if len(terms) > 0:
-            term = {}
-
-            for key, value in terms.items():
-                term[key] = value
+        if terms:
 
             range_ = query['facets']['histo1']['facet_filter']['range']
-            filter_ = {'and': [{'term': term},
-                               {'range': range_}]}
-            query['facets']['histo1']['facet_filter'] = filter_
+
+            query['facets']['histo1']['facet_filter'] = {
+                'and': ([{'term': {k: v}} for k, v in terms.items()] +
+                        [{'range': range_}])}
 
         with self.statsd.timer('elasticsearch-query'):
             res = self.session.post(self.es, data=json.dumps(query))

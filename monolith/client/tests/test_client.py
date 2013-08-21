@@ -28,6 +28,7 @@ class TestClient(IsolatedTestCase):
                 'date': '2012-%.2d-01' % j,
                 'downloads_count': j,
                 'add_on': str(j % 2),
+                'is_something': True,
             })
         self.es_client.refresh()
         self.server.wait()
@@ -75,6 +76,13 @@ class TestClient(IsolatedTestCase):
         hits2 = list(client('downloads_count', start, '2012-05-01',
                             interval='month', add_on='2'))
         self.assertNotEqual(hits, hits2)
+
+    def test_multiple_terms(self):
+        client = self._make_one()
+        hits = list(client('downloads_count', start, '2012-05-01',
+                           interval='month', add_on=1, is_something=True))
+        self.assertEqual(len(hits), 5)
+        self.assertEqual(len([h for h in hits if h['count']]), 2)
 
     def test_global_daily_strict(self):
         client = self._make_one()

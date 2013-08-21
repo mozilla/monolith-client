@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.7 - 2013-08-21
+----------------
+
+- Allow for multiple terms in facet_filter
+
 0.6 - 2013-05-20
 ----------------
 

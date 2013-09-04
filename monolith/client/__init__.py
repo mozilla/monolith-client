@@ -61,9 +61,15 @@ class Client(object):
             start = datetime.datetime.strptime(start.encode(),
                                                '%Y-%m-%d').toordinal()
             start = datetime.date.fromordinal(start)
+        elif isinstance(start, datetime.datetime):
+            start = start.date()
+
+        if isinstance(end, basestring):
             end = datetime.datetime.strptime(end.encode(),
                                              '%Y-%m-%d').toordinal()
             end = datetime.date.fromordinal(end)
+        elif isinstance(end, datetime.datetime):
+            end = end.date()
 
         if interval == DAY:
             drange = util.iterdays(start, end)

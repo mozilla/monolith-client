@@ -24,7 +24,7 @@ build: $(PYTHON) elasticsearch
 clean:
 	rm -rf $(BUILD_DIRS)
 
-test: build
+test:
 	ES_PATH=$(HERE)/elasticsearch \
 	$(BIN)/nosetests -s -d -v --with-xunit --with-coverage --cover-package "monolith.client" monolith
 

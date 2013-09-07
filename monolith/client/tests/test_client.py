@@ -58,6 +58,19 @@ class TestClient(IsolatedTestCase):
         client = self._make_one()
         hits = list(client('downloads_count', '2010-01-01', '2010-01-31'))
         self.assertEqual(len(hits), 31)
+        self.assertEqual(hits[0]['count'], None)
+
+    def test_no_fill_strict(self):
+        client = self._make_one(zero_fill=False)
+        hits = list(client('downloads_count', '2010-01-01', '2010-01-31',
+                           strict_range=True))
+        self.assertEqual(len(hits), 0)
+
+        # zero fill by default
+        client = self._make_one()
+        hits = list(client('downloads_count', '2010-01-01', '2010-01-31',
+                           strict_range=True))
+        self.assertEqual(len(hits), 29)
 
     def test_global_weekly(self):
         client = self._make_one()
@@ -92,18 +105,6 @@ class TestClient(IsolatedTestCase):
     def test_global_daily_strict(self):
         client = self._make_one()
         hits = list(client('downloads_count', START, END, strict_range=True))
-        self.assertEqual(len(hits), 29)
-
-    def test_no_fill_strict(self):
-        client = self._make_one(zero_fill=False)
-        hits = list(client('downloads_count', '2010-01-01', '2010-01-31',
-                           strict_range=True))
-        self.assertEqual(len(hits), 0)
-
-        # zero fill by default
-        client = self._make_one()
-        hits = list(client('downloads_count', '2010-01-01', '2010-01-31',
-                           strict_range=True))
         self.assertEqual(len(hits), 29)
 
     def test_global_weekly_strict(self):

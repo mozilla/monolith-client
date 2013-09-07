@@ -167,7 +167,7 @@ class Client(object):
             if date_ in counts:
                 yield {'count': counts[date_], 'date': date_}
             elif self.zero_fill:
-                yield {'count': 0, 'date': date_}
+                yield {'count': None, 'date': date_}
 
 
 def main():

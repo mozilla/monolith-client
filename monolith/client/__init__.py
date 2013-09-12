@@ -149,7 +149,7 @@ class Client(object):
         if 'errors' in res:
             raise ValueError(res['errors'][0]['description'])
 
-        dates = set()
+        counts = {}
 
         for entry in res['facets']['histo1']['entries']:
             time_ = entry['time'] / 1000.0
@@ -158,19 +158,16 @@ class Client(object):
                 count = entry['total']
             else:
                 count = entry['count']
+            counts[date_] = count
 
-            if date_ not in dates:
-                dates.add(date_)
+        for date_ in drange:
+            if strict_range and date_ in (start, end):
+                continue
 
-            yield {'count': count, 'date': date_}
-
-        if self.zero_fill:
-            # yielding zeros
-            for date_ in drange:
-                if strict_range and date_ in (start, end):
-                    continue
-                if date_ not in dates:
-                    yield {'count': 0, 'date': date_}
+            if date_ in counts:
+                yield {'count': counts[date_], 'date': date_}
+            elif self.zero_fill:
+                yield {'count': 0, 'date': date_}
 
 
 def main():

@@ -31,7 +31,7 @@ class TestClient(IsolatedTestCase):
             self.es_client.index('time_2012-%.2d' % j, 'downloads', {
                 'date': '2012-%.2d-01' % j,
                 'downloads_count': j,
-                'add_on': str(j % 2),
+                'add_on': str(j % 2 + 1),
                 'is_something': True,
             })
         self.es_client.refresh()
@@ -63,8 +63,9 @@ class TestClient(IsolatedTestCase):
         client = self._make_one()
         hits = list(client('downloads_count', START, END, interval='week'))
 
-        # between 2012-01-01 and 2012-01-31, we have 4 weeks
-        self.assertEqual(len(hits), 6)
+        # Between 2012-01-01 and 2012-01-31, we have 5 weeks starting on
+        # Monday.
+        self.assertEqual(len(hits), 5)
 
     def test_monthly(self):
         client = self._make_one()
@@ -110,8 +111,9 @@ class TestClient(IsolatedTestCase):
         hits = list(client('downloads_count', START, END, interval='week',
                            strict_range=True))
 
-        # between 2012-01-01 and 2012-01-31, we have 4 weeks
-        self.assertEqual(len(hits), 6)
+        # Between 2012-01-01 and 2012-01-31, we have 5 weeks starting on
+        # Monday.
+        self.assertEqual(len(hits), 5)
 
     def test_monthly_strict(self):
         client = self._make_one()
@@ -119,10 +121,10 @@ class TestClient(IsolatedTestCase):
         hits = list(client('downloads_count', START, '2012-05-01',
                            interval='month', add_on='1', strict_range=True))
 
-        # we should have the 5 first months of 2012
+        # we should have the 5 first months of 2012, minus Jan and May.
         res = [hit['date'].month for hit in hits]
         res.sort()
-        self.assertEqual(res, [1, 2, 3, 4])
+        self.assertEqual(res, [2, 3, 4])
 
         hits2 = list(client('downloads_count', START, '2012-05-01',
                             interval='month', add_on='2', strict_range=True))
@@ -166,9 +168,22 @@ class TestClient(IsolatedTestCase):
         client = self._make_one()
         start = datetime.datetime(2012, 1, 1, 12, 34, 56)
         end = datetime.datetime(2012, 1, 31, 12, 34, 56)
-        hits = list(client('downloads_count', start, end, interval='week'))
-        self.assertEqual(len(hits), 6)
+        list(client('downloads_count', start, end, interval='week'))
         self.assertEqual(_mock.call_args[0][0], datetime.date(2012, 1, 1))
         assert not isinstance(_mock.call_args[0][0], datetime.datetime)
         self.assertEqual(_mock.call_args[0][1], datetime.date(2012, 1, 31))
         assert not isinstance(_mock.call_args[0][1], datetime.datetime)
+
+    def test_date_order(self):
+        # Ensure fill doesn't change date ordering.
+        client = self._make_one()
+        prev_date = datetime.date(2000, 1, 1)
+
+        # Addon 1 doesn't have downloads for every month and the client will
+        # fill zeroes for the missing dates.
+        hits = list(client('downloads_count', START, '2012-05-01',
+                           interval='month', add_on='1'))
+        for hit in hits:
+            d = hit['date']
+            assert prev_date < d
+            prev_date = d

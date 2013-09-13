@@ -12,6 +12,7 @@ requires = [
 
 test_requires = requires + [
     'coverage',
+    'mock',
     'monolith.web',
     'nose',
     'pyelasticsearch',

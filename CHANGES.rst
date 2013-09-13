@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.8 - 2013-09-13
+----------------
+
+- Pad with null values to distinguish from true zeroes.
+- Updated client to output histogram in date order
+- Updated client to handle datetimes if passed
+
 0.7 - 2013-08-21
 ----------------
 

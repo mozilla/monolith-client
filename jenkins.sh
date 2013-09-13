@@ -8,6 +8,7 @@ find . -name '*.pyc' -exec rm {} \;
 
 echo "Running tests"
 
+make build
 make test
 
 echo "Calculating coverage..."

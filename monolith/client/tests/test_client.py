@@ -44,6 +44,12 @@ class TestClient(IsolatedTestCase):
     def _make_one(self, **kw):
         return Client(self.server.application_url, **kw)
 
+    def test_raw_query(self):
+        client = self._make_one()
+        res = client.raw({'query': {'match_all': {}}})
+        # len(range(1, 32)) + len(range(2, 6)) => 35
+        self.assertEqual(res['hits']['total'], 35)
+
     def test_global_daily(self):
         client = self._make_one()
         hits = list(client('downloads_count', START, END))

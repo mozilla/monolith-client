@@ -51,6 +51,27 @@ class Client(object):
         self.statsd = StatsClient(host=statsd_host, port=statsd_port,
                                   prefix=statsd_prefix)
 
+    def raw(self, query):
+        with self.statsd.timer('elasticsearch-query'):
+            res = self.session.post(self.es, data=json.dumps(query))
+            if res.status_code != 200:
+                raise ValueError(res.content)
+
+            # Get the JSON content.
+            res = res.json
+            if callable(res):
+                res = res()
+
+        self.statsd.incr('elasticsearch-call')
+
+        if not isinstance(res, dict):
+            raise ValueError(res)
+
+        if 'errors' in res:
+            raise ValueError(res['errors'][0]['description'])
+
+        return res
+
     def __call__(self, field, start, end, interval=DAY, strict_range=False,
                  **terms):
 
@@ -130,25 +151,7 @@ class Client(object):
                 'and': ([{'term': {k: v}} for k, v in terms.items()] +
                         [{'range': range_}])}
 
-        with self.statsd.timer('elasticsearch-query'):
-            res = self.session.post(self.es, data=json.dumps(query))
-            if res.status_code != 200:
-                raise ValueError(res.content)
-
-            # getting the JSON content
-            res = res.json
-            if callable(res):
-                res = res()
-
-        # statsd calls
-        self.statsd.incr('elasticsearch-call')
-
-        if not isinstance(res, dict):
-            raise ValueError(res)
-
-        if 'errors' in res:
-            raise ValueError(res['errors'][0]['description'])
-
+        res = self.raw(query)
         counts = {}
 
         for entry in res['facets']['histo1']['entries']:

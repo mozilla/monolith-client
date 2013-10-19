@@ -16,7 +16,9 @@ class TestClient(IsolatedTestCase):
 
     def setUp(self):
         super(TestClient, self).setUp()
-        settings = {'elasticsearch.host': self.es_cluster.urls}
+        self.prefix = 'test_monolith_client_'
+        settings = {'elasticsearch.host': self.es_cluster.urls,
+                    'elasticsearch.prefix': self.prefix}
         app = main({}, **settings)
         self.server = StopableWSGIServer.create(app)
         docs = []
@@ -26,20 +28,25 @@ class TestClient(IsolatedTestCase):
                 'downloads_count': i,
                 'add_on': str(i % 2 + 1),
             })
-        self.es_client.bulk_index('time_2012-01', 'downloads', docs)
+        self.es_client.bulk_index(self._index('time_2012-01'), 'downloads',
+                                  docs)
         for j in range(2, 6):
-            self.es_client.index('time_2012-%.2d' % j, 'downloads', {
-                'date': '2012-%.2d-01' % j,
-                'downloads_count': j,
-                'add_on': str(j % 2 + 1),
-                'is_something': True,
-            })
+            self.es_client.index(
+                self._index('time_2012-%.2d' % j), 'downloads', {
+                    'date': '2012-%.2d-01' % j,
+                    'downloads_count': j,
+                    'add_on': str(j % 2 + 1),
+                    'is_something': True,
+                })
         self.es_client.refresh()
         self.server.wait()
 
     def tearDown(self):
         self.server.shutdown()
         super(TestClient, self).tearDown()
+
+    def _index(self, index):
+        return '%s%s' % (self.prefix, index)
 
     def _make_one(self, **kw):
         return Client(self.server.application_url, **kw)
@@ -148,11 +155,11 @@ class TestClient(IsolatedTestCase):
                 'date': '2013-04-%.2d' % day,
                 'visits': 100,
             })
-        self.es_client.bulk_index('time_2013-04', 'visits', docs)
+        self.es_client.bulk_index(self._index('time_2013-04'), 'visits', docs)
 
         # ... And some we don't want to appear in the results.
         for month in ('04', '01'):
-            self.es_client.index('time_2013-04', 'visits', {
+            self.es_client.index(self._index('time_2013-04'), 'visits', {
                 'date': '2013-01-%s' % month,
                 'visits': 0,
             })

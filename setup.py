@@ -13,11 +13,9 @@ requires = [
 test_requires = requires + [
     'coverage',
     'mock',
-    'monolith.web',
     'nose',
     'pyelasticsearch',
     'pyelastictest',
-    'WebTest',
 ]
 
 with open(os.path.join(here, 'README.rst')) as f:

@@ -1,7 +1,8 @@
-import requests
 import datetime
 import json
+import requests
 from time import strptime
+from urlparse import urljoin
 
 from statsd import StatsClient
 
@@ -32,16 +33,10 @@ def _iso2date(data):
 
 class Client(object):
 
-    def __init__(self, server, zero_fill=True, **kw):
-        self.server = server.rstrip('/')
+    def __init__(self, server, index='time_*', zero_fill=True, **kw):
+        self.server = server
         self.session = requests.session()
-        # getting monolith info
-        info = self.session.get(server).json
-        if callable(info):
-            info = info()
-
-        self.es = self.server + info['es_endpoint']
-        self.fields = info['fields']
+        self.es = urljoin(self.server, index + '/_search')
         self.zero_fill = zero_fill
 
         # statsd settings

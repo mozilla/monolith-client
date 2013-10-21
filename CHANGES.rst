@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.9 - (unreleased)
+------------------
+- Removed dependency on monolith.web proxy
+- Added ability to perform any ES query via client.raw
+
 0.8 - 2013-09-13
 ----------------
 

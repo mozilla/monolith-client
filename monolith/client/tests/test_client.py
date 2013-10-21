@@ -1,9 +1,7 @@
 import datetime
 
 import mock
-from monolith.web import main
 from pyelastictest import IsolatedTestCase
-from webtest.http import StopableWSGIServer
 
 from monolith.client import Client
 
@@ -17,10 +15,6 @@ class TestClient(IsolatedTestCase):
     def setUp(self):
         super(TestClient, self).setUp()
         self.prefix = 'test_monolith_client_'
-        settings = {'elasticsearch.host': self.es_cluster.urls,
-                    'elasticsearch.prefix': self.prefix}
-        app = main({}, **settings)
-        self.server = StopableWSGIServer.create(app)
         docs = []
         for i in range(1, 32):
             docs.append({
@@ -39,17 +33,12 @@ class TestClient(IsolatedTestCase):
                     'is_something': True,
                 })
         self.es_client.refresh()
-        self.server.wait()
-
-    def tearDown(self):
-        self.server.shutdown()
-        super(TestClient, self).tearDown()
 
     def _index(self, index):
         return '%s%s' % (self.prefix, index)
 
     def _make_one(self, **kw):
-        return Client(self.server.application_url, **kw)
+        return Client(self.es_cluster.urls[0], self._index('time_*'), **kw)
 
     def test_raw_query(self):
         client = self._make_one()
@@ -165,7 +154,6 @@ class TestClient(IsolatedTestCase):
             })
 
         self.es_client.refresh()
-        self.server.wait()
 
         client = self._make_one()
         hits = list(client('visits', '2013-04-01', '2013-04-05', 'day'))

@@ -48,7 +48,7 @@ class Client(object):
 
     def raw(self, query):
         with self.statsd.timer('elasticsearch-query'):
-            res = self.session.post(self.es, data=json.dumps(query))
+            res = self.session.get(self.es, data=json.dumps(query))
             if res.status_code != 200:
                 raise ValueError(res.content)
 

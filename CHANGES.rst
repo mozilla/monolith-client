@@ -1,10 +1,13 @@
 Changelog
 =========
 
-0.9 - (unreleased)
-------------------
+0.9 - 2013-10-22
+----------------
+- Changed client requests to use GET instead of POST
 - Removed dependency on monolith.web proxy
+- Updated tests to use prefixed indexes
 - Added ability to perform any ES query via client.raw
+
 
 0.8 - 2013-09-13
 ----------------

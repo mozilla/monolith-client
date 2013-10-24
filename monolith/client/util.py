@@ -42,10 +42,10 @@ def iterweeks(start, end):
         yield start + datetime.timedelta(n)
 
 
-def numweeks(start, end):
+def num_weeks(start, end):
     start, end, delta = _byweek(start, end)
     return len(range(0, delta, 7))
 
 
-def nummonths(start, end):
-    return (end.year - start.year) * 12 + end.month - start.month
+def num_months(start, end):
+    return (end.year - start.year) * 12 + end.month - start.month + 1

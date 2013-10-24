@@ -8,11 +8,10 @@ Changelog
 - Updated tests to use prefixed indexes
 - Added ability to perform any ES query via client.raw
 
-
 0.8 - 2013-09-13
 ----------------
 
-- Pad with null values to distinguish from true zeroes.
+- Pad with null values to distinguish from true zeroes
 - Updated client to output histogram in date order
 - Updated client to handle datetimes if passed
 
@@ -30,7 +29,7 @@ Changelog
 0.5 - 2013-04-16
 ----------------
 
-- Return the original errors if we get some.
+- Return the original errors if we get some
 
 0.4 - 2013-04-15
 ----------------
@@ -48,7 +47,7 @@ Changelog
 
 - Moved to james socol statsd client
 
-0.1 - 2013-03-28 
+0.1 - 2013-03-28
 ----------------
 
 * Initial implementation

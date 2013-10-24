@@ -16,12 +16,11 @@ if [ ! -d "$VENV/bin" ]; then
   virtualenv $VENV --system-site-packages
 fi
 source $VENV/bin/activate
-pip install -U --exists-action=w --no-deps -q -r requirements/prod.txt -r requirements/test.txt
 
 echo "Running tests"
 
 make build
-make test
+export ES_HOST=$ES_HOST && make test
 
 echo "Calculating coverage..."
 

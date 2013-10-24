@@ -1,7 +1,6 @@
 import datetime
 import json
 import requests
-from time import strptime
 from urlparse import urljoin
 
 from statsd import StatsClient
@@ -23,12 +22,6 @@ _str2interval = {'day': DAY,
                  'week': WEEK,
                  'month': MONTH,
                  'year': YEAR}
-
-
-def _iso2date(data):
-    data = data.split('T')[0]
-    data = strptime(data, "%Y-%m-%d")
-    return datetime.date(data.tm_year, data.tm_mon, data.tm_mday)
 
 
 class Client(object):

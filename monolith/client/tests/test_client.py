@@ -1,7 +1,10 @@
 import datetime
+import os
 
 import mock
-from pyelastictest import IsolatedTestCase
+import unittest
+from pyelasticsearch import ElasticSearch
+from pyelasticsearch.exceptions import ElasticHttpNotFoundError
 
 from monolith.client import Client
 
@@ -10,12 +13,24 @@ START = '2012-01-01'
 END = '2012-01-31'
 
 
-class TestClient(IsolatedTestCase):
+class TestClient(unittest.TestCase):
 
     def setUp(self):
         super(TestClient, self).setUp()
-        self.prefix = 'test_monolith_client_'
         docs = []
+
+        self.es_host = os.environ.get('ES_HOST', 'http://localhost:9200')
+        self.prefix = 'test_monolith_client_'
+        self.es_client = ElasticSearch(self.es_host)
+        self.indexes = set()
+
+        # Make sure we're starting with a clean environment.
+        try:
+            self.es_client.delete_index(self._index('*'))
+        except ElasticHttpNotFoundError:
+            pass
+
+        self.indexes.add(self._index('time_2012-01'))
         for i in range(1, 32):
             docs.append({
                 'date': '2012-01-%.2d' % i,
@@ -24,21 +39,29 @@ class TestClient(IsolatedTestCase):
             })
         self.es_client.bulk_index(self._index('time_2012-01'), 'downloads',
                                   docs)
+
         for j in range(2, 6):
+            index = self._index('time_2012-%.2d' % j)
+            self.indexes.add(index)
             self.es_client.index(
-                self._index('time_2012-%.2d' % j), 'downloads', {
+                index, 'downloads', {
                     'date': '2012-%.2d-01' % j,
                     'downloads_count': j,
                     'add_on': str(j % 2 + 1),
                     'is_something': True,
                 })
+
         self.es_client.refresh()
+
+    def tearDown(self):
+        self.es_client.delete_index(self.indexes)
+        super(TestClient, self).tearDown()
 
     def _index(self, index):
         return '%s%s' % (self.prefix, index)
 
     def _make_one(self, **kw):
-        return Client(self.es_cluster.urls[0], self._index('time_*'), **kw)
+        return Client(self.es_host, self._index('time_*'), **kw)
 
     def test_raw_query(self):
         client = self._make_one()

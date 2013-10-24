@@ -5,7 +5,7 @@ echo "Starting build on executor $EXECUTOR_NUMBER..."
 
 cd $WORKSPACE
 VENV=$WORKSPACE/venv
-ES_HOST='jenkins-es20:9200'
+ES_HOST='http://jenkins-es20:9200'
 
 # Make sure there's no old pyc files around.
 find . -name '*.pyc' -exec rm {} \;

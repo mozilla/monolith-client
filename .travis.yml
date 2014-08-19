@@ -1,0 +1,18 @@
+language: python
+
+python:
+  - "2.6"
+
+services:
+  - elasticsearch
+
+before_install:
+  - wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.4.deb && sudo dpkg -i elasticsearch-1.2.4.deb && sudo service elasticsearch restart
+
+install:
+  - pip install -r requirements/prod.txt
+  - pip install -r requirements/test.txt
+  - pip install .
+
+script:
+  - nosetests -s -d -v monolith
